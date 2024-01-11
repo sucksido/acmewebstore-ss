@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acme Web Store - Success Shibambu</title>
+  <style>
+    body {
+      font-family: 'Verdana', sans-serif, sans-serif;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh; 
+      margin-left: 500px;
+      width: 50%;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #output {
+      margin-top: 20px;
+    }
+
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Acme Web Store - SS</h1>
+  <div id="output"></div>
+
+  <script>
+    const categoryTree = {
+      name: 'Electronics',
+      items: ['Laptop', 'Smartphone', 'Watches'],
+      customers: {
+        'Customer1': { visible: true },
+        'Customer2': { visible: true },
+        'Customer3': { visible: true },
+        'Customer4': { visible: false }
+      },
+      subcategories: [
+        {
+          name: 'Mobiles',
+          items: ['iPhone'],
+          customers: {
+            'Customer1': { visible: true },
+            'Customer2': { visible: false },
+            'Customer3': { visible: false }
+          },
+          
+          subcategories: []
+        },
+        {
+          name: 'Mobiles',
+          items: ['Samsung'],
+          customers: {
+            'Customer1': { visible: false },
+            'Customer2': { visible: true },
+            'Customer3': { visible: false }
+          },
+          
+          subcategories: []
+        },
+        {
+          name: 'Mobiles',
+          items: ['Huawei'],
+          customers: {
+            'Customer1': { visible: false },
+            'Customer2': { visible: false },
+            'Customer3': { visible: true }
+          },
+          
+          subcategories: []
+        },
+        {
+          name: 'Mobiles',
+          items: ['Hisense'],
+          customers: {
+            'Customer1': { visible: true },
+            'Customer2': { visible: true },
+            'Customer3': { visible: true }
+          },
+          
+          subcategories: []
+        },
+        {
+          name: 'Mobiles',
+          items: ['Oppo'],
+          customers: {
+            'Customer1': { visible: false },
+            'Customer2': { visible: false },
+            'Customer3': { visible: false },
+            'Customer4': { visible: true }
+          },
+          
+          subcategories: []
+        }
+      ]
+    };
+
+    function computeVisibleItems(root, currentCustomer) {
+      const result = {};
+
+      function dfs(node, parentVisibility) {
+        if (!node) return;
+
+        const customerVisibility = node.customers && node.customers[currentCustomer];
+        const isVisible = customerVisibility ? customerVisibility.visible : parentVisibility;
+
+        if (isVisible) {
+          result[currentCustomer] = result[currentCustomer] || [];
+          result[currentCustomer] = result[currentCustomer].concat(node.items || []);
+
+          if (node.subcategories) {
+            node.subcategories.forEach(subcategory => dfs(subcategory, isVisible));
+          }
+        }
+      }
+
+      dfs(root, true);
+
+      return result;
+    }
+
+    const outputElement = document.getElementById('output');
+
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, '\\$&');
+      const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+      const results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    const customerToSearch = getParameterByName('customer') || 'Customer1'; //if nothing is passed, default to Customer1
+
+    if (categoryTree.customers && categoryTree.customers[customerToSearch]) {
+      const visibleItems = computeVisibleItems(categoryTree, customerToSearch);
+
+      for (const customer in visibleItems) {
+        const itemsList = visibleItems[customer].join(', ');
+        const output = `
+          <h2>Visible Items for ${customer}:</h2>
+          <pre>${itemsList}</pre>
+        `;
+        outputElement.innerHTML += output;
+      }
+    } else {
+      outputElement.innerHTML = '<p>Customer not found in the category tree.</p>';
+    }
+  </script>
+</body>
+</html>
